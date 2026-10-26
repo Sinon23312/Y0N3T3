@@ -33,6 +33,133 @@ let championIndex = {};
 let championNames = [];
 
 /* =========================
+   PREVIEW IMAGINI
+========================= */
+
+let previewTimer = null;
+let activePreview = null;
+let hoveredImage = null;
+
+function showImagePreview(src, name) {
+  // Nu deschidem preview daca imaginea nu este valida.
+  if (!src) return;
+
+  hideImagePreview();
+
+  const overlay = document.createElement("div");
+  overlay.className = "image-preview-overlay";
+  overlay.id = "image-preview-overlay";
+
+  const image = document.createElement("img");
+  image.src = src;
+  image.alt = name || "Imagine marita";
+  image.className = "image-preview-full";
+
+  image.onerror = () => {
+    hideImagePreview();
+  };
+
+  overlay.appendChild(image);
+  document.body.appendChild(overlay);
+
+  activePreview = overlay;
+
+  // Click pe imagine sau pe fundal pentru inchidere.
+  overlay.addEventListener("click", hideImagePreview);
+}
+
+function hideImagePreview() {
+  if (previewTimer !== null) {
+    clearTimeout(previewTimer);
+    previewTimer = null;
+  }
+
+  if (activePreview) {
+    activePreview.remove();
+    activePreview = null;
+  }
+
+  const existing = document.getElementById(
+    "image-preview-overlay"
+  );
+
+  if (existing) {
+    existing.remove();
+  }
+}
+
+function setupImagePreview(img, name) {
+  // Evitam adaugarea de mai multe ori a aceluiasi eveniment.
+  if (img.dataset.previewInitialized === "true") {
+    return;
+  }
+
+  img.dataset.previewInitialized = "true";
+
+  img.addEventListener("mouseenter", () => {
+    // Anulam un timer anterior.
+    if (previewTimer !== null) {
+      clearTimeout(previewTimer);
+    }
+
+    hoveredImage = img;
+
+    // Asteptam 3 secunde inainte de a mari imaginea.
+    previewTimer = setTimeout(() => {
+      previewTimer = null;
+
+      // Verificam daca imaginea este in continuare sub cursor.
+      if (
+        hoveredImage === img &&
+        img.matches(":hover") &&
+        img.isConnected &&
+        img.complete &&
+        img.naturalWidth > 0
+      ) {
+        showImagePreview(img.src, name);
+      }
+    }, 3000);
+  });
+
+  img.addEventListener("mouseleave", () => {
+    if (previewTimer !== null) {
+      clearTimeout(previewTimer);
+      previewTimer = null;
+    }
+
+    if (hoveredImage === img) {
+      hoveredImage = null;
+    }
+
+    // Inchidem preview-ul daca exista.
+    hideImagePreview();
+  });
+}
+
+// Inchidere cu Escape.
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    hideImagePreview();
+  }
+});
+
+// Inchidere daca imaginea este eliminata din lista.
+const previewObserver = new MutationObserver(() => {
+  if (
+    hoveredImage &&
+    !hoveredImage.isConnected
+  ) {
+    hideImagePreview();
+    hoveredImage = null;
+  }
+});
+
+previewObserver.observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
+/* =========================
    SECRET / SPECIAL
 ========================= */
 
@@ -254,40 +381,6 @@ function imagePath(name) {
 }
 
 /* =========================
-   IMAGE PREVIEW
-========================= */
-
-function showImagePreview(src, name) {
-  hideImagePreview();
-
-  const overlay = document.createElement("div");
-
-  overlay.className = "image-preview-overlay";
-  overlay.id = "image-preview-overlay";
-
-  const image = document.createElement("img");
-
-  image.src = src;
-  image.alt = name;
-  image.className = "image-preview-full";
-
-  overlay.appendChild(image);
-  document.body.appendChild(overlay);
-
-  overlay.addEventListener("click", hideImagePreview);
-}
-
-function hideImagePreview() {
-  const existing = document.getElementById(
-    "image-preview-overlay"
-  );
-
-  if (existing) {
-    existing.remove();
-  }
-}
-
-/* =========================
    LOGIN
 ========================= */
 
@@ -334,6 +427,8 @@ document
     loginScreen.classList.remove("hidden");
 
     document.getElementById("password").value = "";
+
+    hideImagePreview();
   });
 
 /* =========================
@@ -479,26 +574,8 @@ function renderCategory(category) {
 
     img.src = imagePath(entry.name);
 
-    /* PREVIEW DUPA 3 SECUNDE */
-
-    let previewTimer = null;
-
-    img.addEventListener("mouseenter", () => {
-      previewTimer = setTimeout(() => {
-        if (img.complete && img.naturalWidth > 0) {
-          showImagePreview(img.src, entry.name);
-        }
-      }, 3000);
-    });
-
-    img.addEventListener("mouseleave", () => {
-      if (previewTimer) {
-        clearTimeout(previewTimer);
-        previewTimer = null;
-      }
-
-      hideImagePreview();
-    });
+    // Initializam preview-ul dupa ce am stabilit imaginea.
+    setupImagePreview(img, entry.name);
 
     /* INFO */
 
@@ -537,6 +614,7 @@ function renderCategory(category) {
 
     minus.type = "button";
     minus.textContent = "−";
+    minus.setAttribute("aria-label", "Scade cantitatea");
 
     minus.addEventListener("click", () => {
       entry.quantity = Math.max(1, entry.quantity - 1);
@@ -553,6 +631,7 @@ function renderCategory(category) {
 
     plus.type = "button";
     plus.textContent = "+";
+    plus.setAttribute("aria-label", "Creste cantitatea");
 
     plus.addEventListener("click", () => {
       entry.quantity += 1;
@@ -573,8 +652,14 @@ function renderCategory(category) {
     remove.className = "remove-entry";
     remove.textContent = "×";
     remove.title = "Sterge campionul";
+    remove.setAttribute("aria-label", "Sterge " + entry.name);
 
     remove.addEventListener("click", () => {
+      if (hoveredImage === img) {
+        hideImagePreview();
+        hoveredImage = null;
+      }
+
       state[category] = state[category].filter(
         item => item.id !== entry.id
       );
