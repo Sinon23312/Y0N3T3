@@ -311,23 +311,76 @@ function refreshAllSuggestions() {
 }
 
 /* =========================
-   IMAGES
-   FOLDERUL images ESTE
-   IN AFARA FOLDERULUI Yonete
+   IMAGE PATH
 ========================= */
 
 function imagePath(name) {
   if (isSecret(name)) {
-    return "images/secret.jpg";
+    return "Images/secret.jpg";
   }
 
   return (
-    "images/" +
+    "Images/" +
     encodeURIComponent(
       name.trim()
     ) +
     ".jpg"
   );
+}
+
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+function showImagePreview(
+  src,
+  name
+) {
+  hideImagePreview();
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "image-preview-overlay";
+
+  overlay.id =
+    "image-preview-overlay";
+
+  const image =
+    document.createElement(
+      "img"
+    );
+
+  image.src = src;
+  image.alt = name;
+
+  image.className =
+    "image-preview-full";
+
+  overlay.appendChild(image);
+
+  document.body.appendChild(
+    overlay
+  );
+
+  overlay.addEventListener(
+    "click",
+    hideImagePreview
+  );
+}
+
+function hideImagePreview() {
+  const existing =
+    document.getElementById(
+      "image-preview-overlay"
+    );
+
+  if (existing) {
+    existing.remove();
+  }
 }
 
 /* =========================
@@ -673,18 +726,48 @@ function renderCategory(
       img.referrerPolicy =
         "no-referrer";
 
-      /*
-        Daca imaginea locala
-        nu exista, folosim
-        placeholder.svg
-      */
+      /* IMAGE FALLBACK */
 
       img.onerror = () => {
         img.onerror = null;
 
         img.src =
-          "images/placeholder.svg";
+          "Images/placeholder.svg";
       };
+
+      /* =========================
+         3 SECOND IMAGE PREVIEW
+      ========================= */
+
+      let previewTimer = null;
+
+      img.addEventListener(
+        "mouseenter",
+        () => {
+          previewTimer =
+            setTimeout(() => {
+              showImagePreview(
+                img.src,
+                entry.name
+              );
+            }, 3000);
+        }
+      );
+
+      img.addEventListener(
+        "mouseleave",
+        () => {
+          if (previewTimer) {
+            clearTimeout(
+              previewTimer
+            );
+
+            previewTimer = null;
+          }
+
+          hideImagePreview();
+        }
+      );
 
       /* INFO */
 
@@ -895,4 +978,3 @@ if (
 }
 
 loadChampions();
-
