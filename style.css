@@ -732,11 +732,7 @@ select:focus {
 .champion-entry img {
   display: block;
   width: 90px !important;
-  height: 90px !important;
-  min-width: 90px;
-  max-width: 90px;
-  min-height: 90px;
-  max-height: 90px;
+  height: 110px !important;
   object-fit: fill !important;
   object-position: center center !important;
   aspect-ratio: 1 / 1;
