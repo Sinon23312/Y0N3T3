@@ -1,4 +1,4 @@
-```javascript
+
 // Lista este pastrata in localStorage, inclusiv dupa refresh si deconectare.
 const VALID_LOGIN = "Yonete";
 const VALID_PASSWORD = "PicioareleLuiCezar!";
@@ -318,11 +318,11 @@ function refreshAllSuggestions() {
 
 function imagePath(name) {
   if (isSecret(name)) {
-    return "../images/secret.jpg";
+    return "images/secret.jpg";
   }
 
   return (
-    "../images/" +
+    "images/" +
     encodeURIComponent(
       name.trim()
     ) +
@@ -683,7 +683,7 @@ function renderCategory(
         img.onerror = null;
 
         img.src =
-          "../images/placeholder.svg";
+          "images/placeholder.svg";
       };
 
       /* INFO */
@@ -895,4 +895,4 @@ if (
 }
 
 loadChampions();
-```
+
