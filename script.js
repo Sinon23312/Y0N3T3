@@ -29,13 +29,6 @@ const specialNames = [
   "secret"
 ];
 
-const imageExtensions = [
-  "jpg",
-  "jpeg",
-  "webp",
-  "png"
-];
-
 let championIndex = {};
 let championNames = [];
 
@@ -128,10 +121,7 @@ async function loadChampions() {
 
       championIndex[key] = {
         name: name,
-        file: champion.image.full.replace(
-          /\.png$/i,
-          ".webp"
-        )
+        file: champion.image.full
       };
 
       championNames.push(name);
@@ -248,54 +238,19 @@ function refreshAllSuggestions() {
 }
 
 /* =========================
-   IMAGE CANDIDATES
+   IMAGE PATH - DOAR JPG
 ========================= */
 
-/*
-  Pentru fiecare campion, incearca automat:
-  .jpg, .jpeg, .webp si .png.
-
-  Pentru numele speciale, foloseste secret.jpg,
-  secret.jpeg, secret.webp sau secret.png.
-*/
-
-function getImageCandidates(name) {
+function imagePath(name) {
   const baseName = isSecret(name)
     ? "secret"
     : name.trim();
 
-  return imageExtensions.map(extension => {
-    return (
-      "images/" +
-      encodeURIComponent(baseName) +
-      "." +
-      extension
-    );
-  });
-}
-
-/*
-  Incearca fiecare extensie in ordine.
-  Daca nu gaseste nicio imagine, foloseste placeholder.svg.
-*/
-
-function setupChampionImage(img, name) {
-  const candidates = getImageCandidates(name);
-
-  let index = 0;
-
-  img.onerror = function () {
-    index++;
-
-    if (index < candidates.length) {
-      img.src = candidates[index];
-    } else {
-      img.onerror = null;
-      img.src = "images/placeholder.svg";
-    }
-  };
-
-  img.src = candidates[0];
+  return (
+    "images/" +
+    encodeURIComponent(baseName) +
+    ".jpg"
+  );
 }
 
 /* =========================
@@ -508,7 +463,7 @@ function renderCategory(category) {
 
     card.className = "champion-entry";
 
-    /* IMAGE */
+    /* IMAGE - DOAR JPG */
 
     const img = document.createElement("img");
 
@@ -517,9 +472,12 @@ function renderCategory(category) {
     img.decoding = "async";
     img.referrerPolicy = "no-referrer";
 
-    /* CAUTARE AUTOMATA A EXTENSIEI */
+    img.onerror = function () {
+      img.onerror = null;
+      img.src = "images/placeholder.svg";
+    };
 
-    setupChampionImage(img, entry.name);
+    img.src = imagePath(entry.name);
 
     /* PREVIEW DUPA 3 SECUNDE */
 
@@ -527,10 +485,6 @@ function renderCategory(category) {
 
     img.addEventListener("mouseenter", () => {
       previewTimer = setTimeout(() => {
-        /*
-          Nu deschide previzualizarea daca imaginea
-          nu a fost incarcata cu succes.
-        */
         if (img.complete && img.naturalWidth > 0) {
           showImagePreview(img.src, entry.name);
         }
