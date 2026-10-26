@@ -316,11 +316,11 @@ function refreshAllSuggestions() {
 
 function imagePath(name) {
   if (isSecret(name)) {
-    return "Images/secret.jpg";
+    return "images/secret.jpg";
   }
 
   return (
-    "Images/" +
+    "images/" +
     encodeURIComponent(
       name.trim()
     ) +
@@ -732,7 +732,7 @@ function renderCategory(
         img.onerror = null;
 
         img.src =
-          "Images/placeholder.svg";
+          "images/placeholder.svg";
       };
 
       /* =========================
