@@ -690,7 +690,7 @@ select:focus {
 
 .champion-entry {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr) 26px;
+  grid-template-columns: 100px minmax(0, 1fr) 26px;
   gap: 12px;
   align-items: center;
   padding: 12px;
