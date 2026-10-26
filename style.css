@@ -727,21 +727,23 @@ select:focus {
   opacity: 1;
 }
 
-/* Imagine in lista: intreaga imagine ramane vizibila */
+/* Imaginea din lista: patrat fix, umplut complet */
 
 .champion-entry img {
   display: block;
-  width: 100px;
-  height: 100px;
-  min-width: 0;
-  max-width: 100%;
-  object-fit: cover;
-  object-position: center;
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px;
+  max-width: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  object-fit: cover !important;
+  object-position: center center !important;
   aspect-ratio: 1 / 1;
   background: #050b12;
   border: 1px solid #52606a;
   border-radius: 3px;
-  padding: 2px;
+  padding: 0;
   cursor: pointer;
   transition: border-color 0.25s, filter 0.25s, transform 0.25s;
 }
@@ -1209,9 +1211,15 @@ footer::before {
   }
 
   .champion-entry img {
-    width: 76px;
-    height: 76px;
-    object-fit: cover;
+    width: 76px !important;
+    height: 76px !important;
+    min-width: 76px;
+    max-width: 76px;
+    min-height: 76px;
+    max-height: 76px;
+    object-fit: cover !important;
+    object-position: center center !important;
+    padding: 0;
   }
 
   .champion-entry .champ-name {
