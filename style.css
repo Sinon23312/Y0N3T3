@@ -36,7 +36,7 @@ body {
   background:
     radial-gradient(ellipse at 50% -10%, #244c5b 0%, transparent 45%),
     radial-gradient(ellipse at 0% 60%, rgba(10, 200, 185, 0.07), transparent 35%),
-    radial-gradient(ellipse at 100% 80%, rgba(200, 170, 110, 0.07), transparent 35%),
+    radial-gradient(ellipse at 100% 90px, rgba(200, 170, 110, 0.07), transparent 35%),
     linear-gradient(145deg, #07111b, #03070c 75%);
   background-attachment: fixed;
   overflow-x: hidden;
@@ -690,7 +690,7 @@ select:focus {
 
 .champion-entry {
   display: grid;
-  grid-template-columns: 80% minmax(0, 1fr) 26px;
+  grid-template-columns: 90px minmax(0, 1fr) 26px;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -731,13 +731,13 @@ select:focus {
 
 .champion-entry img {
   display: block;
-  width: 80% !important;
-  height: 80% !important;
-  min-width: 80%;
-  max-width: 80%;
-  min-height: 80%;
-  max-height: 80%;
-  object-fit: cover !important;
+  width: 90px !important;
+  height: 90px !important;
+  min-width: 90px;
+  max-width: 90px;
+  min-height: 90px;
+  max-height: 90px;
+  object-fit: fill !important;
   object-position: center center !important;
   aspect-ratio: 1 / 1;
   background: #050b12;
@@ -970,7 +970,7 @@ footer {
 footer::before {
   content: "";
   display: block;
-  width: 80%;
+  width: 90px;
   height: 1px;
   margin: 0 auto 18px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
