@@ -33,52 +33,57 @@ let championIndex = {};
 let championNames = [];
 
 /* =========================
-   PREVIEW IMAGINI
+   PREVIEW IMAGINI - CLICK
 ========================= */
 
-let previewTimer = null;
 let activePreview = null;
-let hoveredImage = null;
 
 function showImagePreview(src, name) {
-  // Nu deschidem preview daca imaginea nu este valida.
   if (!src) return;
 
+  // Inchidem preview-ul anterior, daca exista.
   hideImagePreview();
 
   const overlay = document.createElement("div");
+
   overlay.className = "image-preview-overlay";
   overlay.id = "image-preview-overlay";
 
   const image = document.createElement("img");
+
   image.src = src;
   image.alt = name || "Imagine marita";
   image.className = "image-preview-full";
+
+  const title = document.createElement("div");
+
+  title.className = "image-preview-name";
+  title.textContent = name || "";
 
   image.onerror = () => {
     hideImagePreview();
   };
 
-  overlay.appendChild(image);
+  overlay.append(image, title);
   document.body.appendChild(overlay);
 
   activePreview = overlay;
 
-  // Click pe imagine sau pe fundal pentru inchidere.
-  overlay.addEventListener("click", hideImagePreview);
+  // Click pe fundal pentru inchidere.
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      hideImagePreview();
+    }
+  });
 }
 
 function hideImagePreview() {
-  if (previewTimer !== null) {
-    clearTimeout(previewTimer);
-    previewTimer = null;
-  }
-
   if (activePreview) {
     activePreview.remove();
     activePreview = null;
   }
 
+  // Curatam si cazul in care overlay-ul exista deja.
   const existing = document.getElementById(
     "image-preview-overlay"
   );
@@ -89,74 +94,35 @@ function hideImagePreview() {
 }
 
 function setupImagePreview(img, name) {
-  // Evitam adaugarea de mai multe ori a aceluiasi eveniment.
+  // Prevenim inregistrarea aceluiasi eveniment de mai multe ori.
   if (img.dataset.previewInitialized === "true") {
     return;
   }
 
   img.dataset.previewInitialized = "true";
+  img.style.cursor = "pointer";
 
-  img.addEventListener("mouseenter", () => {
-    // Anulam un timer anterior.
-    if (previewTimer !== null) {
-      clearTimeout(previewTimer);
+  img.addEventListener("click", event => {
+    event.stopPropagation();
+
+    // Nu marim imaginile care nu s-au incarcat.
+    if (
+      !img.complete ||
+      img.naturalWidth === 0 ||
+      img.src.includes("placeholder.svg")
+    ) {
+      return;
     }
 
-    hoveredImage = img;
-
-    // Asteptam 3 secunde inainte de a mari imaginea.
-    previewTimer = setTimeout(() => {
-      previewTimer = null;
-
-      // Verificam daca imaginea este in continuare sub cursor.
-      if (
-        hoveredImage === img &&
-        img.matches(":hover") &&
-        img.isConnected &&
-        img.complete &&
-        img.naturalWidth > 0
-      ) {
-        showImagePreview(img.src, name);
-      }
-    }, 3000);
-  });
-
-  img.addEventListener("mouseleave", () => {
-    if (previewTimer !== null) {
-      clearTimeout(previewTimer);
-      previewTimer = null;
-    }
-
-    if (hoveredImage === img) {
-      hoveredImage = null;
-    }
-
-    // Inchidem preview-ul daca exista.
-    hideImagePreview();
+    showImagePreview(img.src, name);
   });
 }
 
-// Inchidere cu Escape.
+// Inchidem imaginea marita cu Escape.
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     hideImagePreview();
   }
-});
-
-// Inchidere daca imaginea este eliminata din lista.
-const previewObserver = new MutationObserver(() => {
-  if (
-    hoveredImage &&
-    !hoveredImage.isConnected
-  ) {
-    hideImagePreview();
-    hoveredImage = null;
-  }
-});
-
-previewObserver.observe(document.body, {
-  childList: true,
-  subtree: true
 });
 
 /* =========================
@@ -574,7 +540,7 @@ function renderCategory(category) {
 
     img.src = imagePath(entry.name);
 
-    // Initializam preview-ul dupa ce am stabilit imaginea.
+    // Click pe imagine pentru a o mari.
     setupImagePreview(img, entry.name);
 
     /* INFO */
@@ -655,11 +621,6 @@ function renderCategory(category) {
     remove.setAttribute("aria-label", "Sterge " + entry.name);
 
     remove.addEventListener("click", () => {
-      if (hoveredImage === img) {
-        hideImagePreview();
-        hoveredImage = null;
-      }
-
       state[category] = state[category].filter(
         item => item.id !== entry.id
       );
