@@ -690,7 +690,7 @@ select:focus {
 
 .champion-entry {
   display: grid;
-  grid-template-columns: 100px minmax(0, 1fr) 26px;
+  grid-template-columns: 80% minmax(0, 1fr) 26px;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -731,12 +731,12 @@ select:focus {
 
 .champion-entry img {
   display: block;
-  width: 100px !important;
-  height: 100px !important;
-  min-width: 100px;
-  max-width: 100px;
-  min-height: 100px;
-  max-height: 100px;
+  width: 80% !important;
+  height: 80% !important;
+  min-width: 80%;
+  max-width: 80%;
+  min-height: 80%;
+  max-height: 80%;
   object-fit: cover !important;
   object-position: center center !important;
   aspect-ratio: 1 / 1;
@@ -970,7 +970,7 @@ footer {
 footer::before {
   content: "";
   display: block;
-  width: 100px;
+  width: 80%;
   height: 1px;
   margin: 0 auto 18px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
