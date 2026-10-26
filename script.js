@@ -316,15 +316,12 @@ function refreshAllSuggestions() {
 
 function imagePath(name) {
   if (isSecret(name)) {
-    return "images/secret.jpg";
+    return "images/secret";
   }
 
   return (
     "images/" +
-    encodeURIComponent(
-      name.trim()
-    ) +
-    ".jpg"
+    encodeURIComponent(name.trim())
   );
 }
 
