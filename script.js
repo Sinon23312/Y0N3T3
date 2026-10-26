@@ -135,15 +135,9 @@ function refreshAllSuggestions() {
 }
 
 function imagePath(name) {
-  if (isSecret(name)) return "images/secret.webp";
+  if (isSecret(name)) return "images/secret.jpg";
 
-  const champion = championIndex[normalize(name)];
-  if (champion?.file) {
-    return WEBP_BASE + champion.file;
-  }
-
-  // Fallback pentru nume introduse manual: folosim numele ca filename .webp.
-  return WEBP_BASE + encodeURIComponent(name.trim()) + ".webp";
+  return "images/" + name.trim() + ".jpg";
 }
 
 function showApp() {
