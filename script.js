@@ -1,5 +1,8 @@
 
-// Lista este pastrata in localStorage, inclusiv dupa refresh si deconectare.
+/* =========================
+   CONFIGURARE
+========================= */
+
 const VALID_LOGIN = "Yonete";
 const VALID_PASSWORD = "PicioareleLuiCezar!";
 const STORAGE_KEY = "yoneteChampionBoard";
@@ -24,6 +27,13 @@ const specialNames = [
   "ce vrei tu",
   "ce vreau eu",
   "secret"
+];
+
+const imageExtensions = [
+  "jpg",
+  "jpeg",
+  "webp",
+  "png"
 ];
 
 let championIndex = {};
@@ -104,9 +114,7 @@ async function loadChampions() {
     );
 
     if (!response.ok) {
-      throw new Error(
-        `HTTP ${response.status}`
-      );
+      throw new Error(`HTTP ${response.status}`);
     }
 
     const json = await response.json();
@@ -114,31 +122,23 @@ async function loadChampions() {
     championIndex = {};
     championNames = [];
 
-    Object.values(json.data).forEach(
-      champion => {
-        const name =
-          champion.name.trim();
+    Object.values(json.data).forEach(champion => {
+      const name = champion.name.trim();
+      const key = normalize(name);
 
-        const key =
-          normalize(name);
+      championIndex[key] = {
+        name: name,
+        file: champion.image.full.replace(
+          /\.png$/i,
+          ".webp"
+        )
+      };
 
-        championIndex[key] = {
-          name: name,
+      championNames.push(name);
+    });
 
-          file:
-            champion.image.full.replace(
-              /\.png$/i,
-              ".webp"
-            )
-        };
-
-        championNames.push(name);
-      }
-    );
-
-    championNames.sort(
-      (a, b) =>
-        a.localeCompare(b)
+    championNames.sort((a, b) =>
+      a.localeCompare(b)
     );
 
     refreshAllSuggestions();
@@ -152,9 +152,7 @@ async function loadChampions() {
     refreshAllSuggestions();
   }
 
-  Object.keys(state).forEach(
-    renderCategory
-  );
+  Object.keys(state).forEach(renderCategory);
 }
 
 /* =========================
@@ -165,10 +163,7 @@ function getMatches(query) {
   const q = normalize(query);
 
   if (!q) {
-    return championNames.slice(
-      0,
-      12
-    );
+    return championNames.slice(0, 12);
   }
 
   return championNames
@@ -177,35 +172,18 @@ function getMatches(query) {
       value: normalize(name)
     }))
     .sort((a, b) => {
-      const aStarts =
-        a.value.startsWith(q)
-          ? 0
-          : 1;
+      const aStarts = a.value.startsWith(q) ? 0 : 1;
+      const bStarts = b.value.startsWith(q) ? 0 : 1;
 
-      const bStarts =
-        b.value.startsWith(q)
-          ? 0
-          : 1;
-
-      if (
-        aStarts !== bStarts
-      ) {
-        return (
-          aStarts - bStarts
-        );
+      if (aStarts !== bStarts) {
+        return aStarts - bStarts;
       }
 
-      return a.value.localeCompare(
-        b.value
-      );
+      return a.value.localeCompare(b.value);
     })
-    .filter(item =>
-      item.value.includes(q)
-    )
+    .filter(item => item.value.includes(q))
     .slice(0, 10)
-    .map(item =>
-      item.name
-    );
+    .map(item => item.name);
 }
 
 function renderSuggestions(
@@ -217,163 +195,137 @@ function renderSuggestions(
     return;
   }
 
-  const matches =
-    getMatches(input.value);
+  const matches = getMatches(input.value);
 
   suggestions.innerHTML = "";
 
-  if (
-    !forceShow &&
-    !input.value.trim()
-  ) {
-    suggestions.classList.remove(
-      "open"
-    );
-
+  if (!forceShow && !input.value.trim()) {
+    suggestions.classList.remove("open");
     return;
   }
 
   if (!matches.length) {
-    suggestions.classList.remove(
-      "open"
-    );
-
+    suggestions.classList.remove("open");
     return;
   }
 
   matches.forEach(name => {
-    const option =
-      document.createElement(
-        "button"
-      );
+    const option = document.createElement("button");
 
     option.type = "button";
-
-    option.className =
-      "suggestion-option";
-
+    option.className = "suggestion-option";
     option.textContent = name;
 
-    option.addEventListener(
-      "mousedown",
-      event => {
-        event.preventDefault();
+    option.addEventListener("mousedown", event => {
+      event.preventDefault();
 
-        input.value = name;
+      input.value = name;
+      suggestions.classList.remove("open");
+      input.focus();
+    });
 
-        suggestions.classList.remove(
-          "open"
-        );
-
-        input.focus();
-      }
-    );
-
-    suggestions.appendChild(
-      option
-    );
+    suggestions.appendChild(option);
   });
 
-  suggestions.classList.add(
-    "open"
-  );
+  suggestions.classList.add("open");
 }
 
 function refreshAllSuggestions() {
   document
-    .querySelectorAll(
-      ".champion-autocomplete"
-    )
+    .querySelectorAll(".champion-autocomplete")
     .forEach(wrapper => {
-      const input =
-        wrapper.querySelector(
-          ".champion-name"
-        );
-
-      const suggestions =
-        wrapper.querySelector(
-          ".suggestions"
-        );
+      const input = wrapper.querySelector(".champion-name");
+      const suggestions = wrapper.querySelector(".suggestions");
 
       if (
         input &&
         suggestions &&
-        document.activeElement ===
-          input
+        document.activeElement === input
       ) {
-        renderSuggestions(
-          input,
-          suggestions,
-          true
-        );
+        renderSuggestions(input, suggestions, true);
       }
     });
 }
 
 /* =========================
-   IMAGE PATH
+   IMAGE CANDIDATES
 ========================= */
 
-function imagePath(name) {
-  if (isSecret(name)) {
-    return "images/secret";
-  }
+/*
+  Pentru fiecare campion, incearca automat:
+  .jpg, .jpeg, .webp si .png.
 
-  return (
-    "images/" +
-    encodeURIComponent(name.trim())
-  );
+  Pentru numele speciale, foloseste secret.jpg,
+  secret.jpeg, secret.webp sau secret.png.
+*/
+
+function getImageCandidates(name) {
+  const baseName = isSecret(name)
+    ? "secret"
+    : name.trim();
+
+  return imageExtensions.map(extension => {
+    return (
+      "images/" +
+      encodeURIComponent(baseName) +
+      "." +
+      extension
+    );
+  });
+}
+
+/*
+  Incearca fiecare extensie in ordine.
+  Daca nu gaseste nicio imagine, foloseste placeholder.svg.
+*/
+
+function setupChampionImage(img, name) {
+  const candidates = getImageCandidates(name);
+
+  let index = 0;
+
+  img.onerror = function () {
+    index++;
+
+    if (index < candidates.length) {
+      img.src = candidates[index];
+    } else {
+      img.onerror = null;
+      img.src = "images/placeholder.svg";
+    }
+  };
+
+  img.src = candidates[0];
 }
 
 /* =========================
    IMAGE PREVIEW
 ========================= */
 
-function showImagePreview(
-  src,
-  name
-) {
+function showImagePreview(src, name) {
   hideImagePreview();
 
-  const overlay =
-    document.createElement(
-      "div"
-    );
+  const overlay = document.createElement("div");
 
-  overlay.className =
-    "image-preview-overlay";
+  overlay.className = "image-preview-overlay";
+  overlay.id = "image-preview-overlay";
 
-  overlay.id =
-    "image-preview-overlay";
-
-  const image =
-    document.createElement(
-      "img"
-    );
+  const image = document.createElement("img");
 
   image.src = src;
   image.alt = name;
-
-  image.className =
-    "image-preview-full";
+  image.className = "image-preview-full";
 
   overlay.appendChild(image);
+  document.body.appendChild(overlay);
 
-  document.body.appendChild(
-    overlay
-  );
-
-  overlay.addEventListener(
-    "click",
-    hideImagePreview
-  );
+  overlay.addEventListener("click", hideImagePreview);
 }
 
 function hideImagePreview() {
-  const existing =
-    document.getElementById(
-      "image-preview-overlay"
-    );
+  const existing = document.getElementById(
+    "image-preview-overlay"
+  );
 
   if (existing) {
     existing.remove();
@@ -385,591 +337,312 @@ function hideImagePreview() {
 ========================= */
 
 function showApp() {
-  loginScreen.classList.add(
-    "hidden"
-  );
-
-  appScreen.classList.remove(
-    "hidden"
-  );
+  loginScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
 }
 
-loginForm.addEventListener(
-  "submit",
-  event => {
-    event.preventDefault();
+loginForm.addEventListener("submit", event => {
+  event.preventDefault();
 
-    const username =
-      document.getElementById(
-        "username"
-      ).value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-    const password =
-      document.getElementById(
-        "password"
-      ).value;
+  if (
+    username === VALID_LOGIN &&
+    password === VALID_PASSWORD
+  ) {
+    loginError.textContent = "";
 
-    if (
-      username === VALID_LOGIN &&
-      password === VALID_PASSWORD
-    ) {
-      loginError.textContent =
-        "";
+    sessionStorage.setItem(
+      "yoneteLoggedIn",
+      "yes"
+    );
 
-      sessionStorage.setItem(
-        "yoneteLoggedIn",
-        "yes"
-      );
+    showApp();
 
-      showApp();
-
-    } else {
-      loginError.textContent =
-        "Login sau parola incorecta. Incearca din nou.";
-    }
+  } else {
+    loginError.textContent =
+      "Login sau parola incorecta. Incearca din nou.";
   }
-);
+});
 
 /* =========================
    LOGOUT
 ========================= */
 
 document
-  .getElementById(
-    "logout-button"
-  )
-  .addEventListener(
-    "click",
-    () => {
-      sessionStorage.removeItem(
-        "yoneteLoggedIn"
-      );
+  .getElementById("logout-button")
+  .addEventListener("click", () => {
+    sessionStorage.removeItem("yoneteLoggedIn");
 
-      appScreen.classList.add(
-        "hidden"
-      );
+    appScreen.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
 
-      loginScreen.classList.remove(
-        "hidden"
-      );
-
-      document.getElementById(
-        "password"
-      ).value = "";
-    }
-  );
+    document.getElementById("password").value = "";
+  });
 
 /* =========================
    CATEGORY PANELS
 ========================= */
 
 document
-  .querySelectorAll(
-    ".category-panel"
-  )
+  .querySelectorAll(".category-panel")
   .forEach(panel => {
-    const category =
-      panel.dataset.category;
+    const category = panel.dataset.category;
 
-    const form =
-      panel.querySelector(
-        ".champion-form"
-      );
-
-    const nameInput =
-      panel.querySelector(
-        ".champion-name"
-      );
-
-    const suggestions =
-      panel.querySelector(
-        ".suggestions"
-      );
+    const form = panel.querySelector(".champion-form");
+    const nameInput = panel.querySelector(".champion-name");
+    const suggestions = panel.querySelector(".suggestions");
 
     /* AUTOCOMPLETE */
 
-    nameInput.addEventListener(
-      "input",
-      () => {
-        renderSuggestions(
-          nameInput,
-          suggestions
-        );
-      }
-    );
+    nameInput.addEventListener("input", () => {
+      renderSuggestions(nameInput, suggestions);
+    });
 
-    nameInput.addEventListener(
-      "focus",
-      () => {
-        renderSuggestions(
-          nameInput,
-          suggestions,
-          true
-        );
-      }
-    );
+    nameInput.addEventListener("focus", () => {
+      renderSuggestions(nameInput, suggestions, true);
+    });
 
-    nameInput.addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key === "Escape"
-        ) {
-          suggestions.classList.remove(
-            "open"
-          );
-        }
+    nameInput.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        suggestions.classList.remove("open");
       }
-    );
+    });
 
-    document.addEventListener(
-      "click",
-      event => {
-        if (
-          !panel
-            .querySelector(
-              ".champion-autocomplete"
-            )
-            ?.contains(
-              event.target
-            )
-        ) {
-          suggestions.classList.remove(
-            "open"
-          );
-        }
+    document.addEventListener("click", event => {
+      const autocomplete = panel.querySelector(
+        ".champion-autocomplete"
+      );
+
+      if (!autocomplete?.contains(event.target)) {
+        suggestions.classList.remove("open");
       }
-    );
+    });
 
     /* QUANTITY */
 
-    const damageInput =
-      panel.querySelector(
-        ".damage"
-      );
-
-    const qtyOutput =
-      panel.querySelector(
-        ".qty-value"
-      );
+    const damageInput = panel.querySelector(".damage");
+    const qtyOutput = panel.querySelector(".qty-value");
 
     let quantity = 1;
 
     panel
-      .querySelector(
-        ".qty-minus"
-      )
-      .addEventListener(
-        "click",
-        () => {
-          quantity =
-            Math.max(
-              1,
-              quantity - 1
-            );
-
-          qtyOutput.textContent =
-            quantity;
-        }
-      );
+      .querySelector(".qty-minus")
+      .addEventListener("click", () => {
+        quantity = Math.max(1, quantity - 1);
+        qtyOutput.textContent = quantity;
+      });
 
     panel
-      .querySelector(
-        ".qty-plus"
-      )
-      .addEventListener(
-        "click",
-        () => {
-          quantity += 1;
-
-          qtyOutput.textContent =
-            quantity;
-        }
-      );
+      .querySelector(".qty-plus")
+      .addEventListener("click", () => {
+        quantity += 1;
+        qtyOutput.textContent = quantity;
+      });
 
     /* ADD CHAMPION */
 
-    form.addEventListener(
-      "submit",
-      event => {
-        event.preventDefault();
+    form.addEventListener("submit", event => {
+      event.preventDefault();
 
-        const typedName =
-          nameInput.value.trim();
+      const typedName = nameInput.value.trim();
 
-        if (!typedName) {
-          return;
-        }
-
-        const official =
-          championIndex[
-            normalize(
-              typedName
-            )
-          ]?.name;
-
-        const name =
-          official ||
-          typedName;
-
-        state[category].push({
-          id:
-            Date.now() +
-            Math.random(),
-
-          name,
-
-          damage:
-            damageInput.value,
-
-          quantity
-        });
-
-        saveState();
-
-        nameInput.value = "";
-
-        suggestions.classList.remove(
-          "open"
-        );
-
-        quantity = 1;
-
-        qtyOutput.textContent =
-          quantity;
-
-        renderCategory(
-          category
-        );
+      if (!typedName) {
+        return;
       }
-    );
+
+      const official =
+        championIndex[normalize(typedName)]?.name;
+
+      const name = official || typedName;
+
+      state[category].push({
+        id: Date.now() + Math.random(),
+        name,
+        damage: damageInput.value,
+        quantity
+      });
+
+      saveState();
+
+      nameInput.value = "";
+      suggestions.classList.remove("open");
+
+      quantity = 1;
+      qtyOutput.textContent = quantity;
+
+      renderCategory(category);
+    });
   });
 
 /* =========================
    RENDER CATEGORY
 ========================= */
 
-function renderCategory(
-  category
-) {
-  const panel =
-    document.querySelector(
-      `[data-category="${category}"]`
-    );
+function renderCategory(category) {
+  const panel = document.querySelector(
+    `[data-category="${category}"]`
+  );
 
   if (!panel) {
     return;
   }
 
-  const list =
-    panel.querySelector(
-      ".champion-list"
-    );
+  const list = panel.querySelector(".champion-list");
 
   list.innerHTML = "";
 
-  if (
-    state[category].length === 0
-  ) {
-    const empty =
-      document.createElement(
-        "div"
-      );
+  if (state[category].length === 0) {
+    const empty = document.createElement("div");
 
-    empty.className =
-      "empty-list";
+    empty.className = "empty-list";
+    empty.textContent = "Niciun campion adaugat inca.";
 
-    empty.textContent =
-      "Niciun campion adaugat inca.";
-
-    list.appendChild(
-      empty
-    );
-
+    list.appendChild(empty);
     return;
   }
 
-  state[category].forEach(
-    entry => {
-      const card =
-        document.createElement(
-          "div"
-        );
+  state[category].forEach(entry => {
+    const card = document.createElement("div");
 
-      card.className =
-        "champion-entry";
+    card.className = "champion-entry";
 
-      /* IMAGE */
+    /* IMAGE */
 
-      const img =
-        document.createElement(
-          "img"
-        );
+    const img = document.createElement("img");
 
-      img.src =
-        imagePath(
-          entry.name
-        );
+    img.alt = entry.name;
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.referrerPolicy = "no-referrer";
 
-      img.alt =
-        entry.name;
+    /* CAUTARE AUTOMATA A EXTENSIEI */
 
-      img.loading =
-        "lazy";
+    setupChampionImage(img, entry.name);
 
-      img.decoding =
-        "async";
+    /* PREVIEW DUPA 3 SECUNDE */
 
-      img.referrerPolicy =
-        "no-referrer";
+    let previewTimer = null;
 
-      /* IMAGE FALLBACK */
-
-      img.onerror = () => {
-        img.onerror = null;
-
-        img.src =
-          "images/placeholder.svg";
-      };
-
-      /* =========================
-         3 SECOND IMAGE PREVIEW
-      ========================= */
-
-      let previewTimer = null;
-
-      img.addEventListener(
-        "mouseenter",
-        () => {
-          previewTimer =
-            setTimeout(() => {
-              showImagePreview(
-                img.src,
-                entry.name
-              );
-            }, 3000);
+    img.addEventListener("mouseenter", () => {
+      previewTimer = setTimeout(() => {
+        /*
+          Nu deschide previzualizarea daca imaginea
+          nu a fost incarcata cu succes.
+        */
+        if (img.complete && img.naturalWidth > 0) {
+          showImagePreview(img.src, entry.name);
         }
+      }, 3000);
+    });
+
+    img.addEventListener("mouseleave", () => {
+      if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+      }
+
+      hideImagePreview();
+    });
+
+    /* INFO */
+
+    const info = document.createElement("div");
+
+    const title = document.createElement("div");
+
+    title.className = "champ-name";
+    title.textContent = entry.name;
+
+    /* META */
+
+    const meta = document.createElement("div");
+
+    meta.className = "champ-meta";
+
+    const damage = document.createElement("span");
+
+    damage.className = "pill " + entry.damage.toLowerCase();
+    damage.textContent = entry.damage;
+
+    const categoryPrice = document.createElement("span");
+
+    categoryPrice.className = "pill price-pill";
+    categoryPrice.textContent = prices[category] + " lei";
+
+    meta.append(damage, categoryPrice);
+
+    /* CONTROLS */
+
+    const controls = document.createElement("div");
+
+    controls.className = "entry-controls";
+
+    const minus = document.createElement("button");
+
+    minus.type = "button";
+    minus.textContent = "−";
+
+    minus.addEventListener("click", () => {
+      entry.quantity = Math.max(1, entry.quantity - 1);
+
+      saveState();
+      renderCategory(category);
+    });
+
+    const count = document.createElement("span");
+
+    count.textContent = "x" + entry.quantity;
+
+    const plus = document.createElement("button");
+
+    plus.type = "button";
+    plus.textContent = "+";
+
+    plus.addEventListener("click", () => {
+      entry.quantity += 1;
+
+      saveState();
+      renderCategory(category);
+    });
+
+    controls.append(minus, count, plus);
+
+    info.append(title, meta, controls);
+
+    /* REMOVE */
+
+    const remove = document.createElement("button");
+
+    remove.type = "button";
+    remove.className = "remove-entry";
+    remove.textContent = "×";
+    remove.title = "Sterge campionul";
+
+    remove.addEventListener("click", () => {
+      state[category] = state[category].filter(
+        item => item.id !== entry.id
       );
 
-      img.addEventListener(
-        "mouseleave",
-        () => {
-          if (previewTimer) {
-            clearTimeout(
-              previewTimer
-            );
+      saveState();
+      renderCategory(category);
+    });
 
-            previewTimer = null;
-          }
+    card.append(img, info, remove);
 
-          hideImagePreview();
-        }
-      );
-
-      /* INFO */
-
-      const info =
-        document.createElement(
-          "div"
-        );
-
-      const title =
-        document.createElement(
-          "div"
-        );
-
-      title.className =
-        "champ-name";
-
-      title.textContent =
-        entry.name;
-
-      /* META */
-
-      const meta =
-        document.createElement(
-          "div"
-        );
-
-      meta.className =
-        "champ-meta";
-
-      const damage =
-        document.createElement(
-          "span"
-        );
-
-      damage.className =
-        "pill " +
-        entry.damage.toLowerCase();
-
-      damage.textContent =
-        entry.damage;
-
-      const categoryPrice =
-        document.createElement(
-          "span"
-        );
-
-      categoryPrice.className =
-        "pill price-pill";
-
-      categoryPrice.textContent =
-        prices[category] +
-        " lei";
-
-      meta.append(
-        damage,
-        categoryPrice
-      );
-
-      /* CONTROLS */
-
-      const controls =
-        document.createElement(
-          "div"
-        );
-
-      controls.className =
-        "entry-controls";
-
-      const minus =
-        document.createElement(
-          "button"
-        );
-
-      minus.type =
-        "button";
-
-      minus.textContent =
-        "−";
-
-      minus.addEventListener(
-        "click",
-        () => {
-          entry.quantity =
-            Math.max(
-              1,
-              entry.quantity - 1
-            );
-
-          saveState();
-
-          renderCategory(
-            category
-          );
-        }
-      );
-
-      const count =
-        document.createElement(
-          "span"
-        );
-
-      count.textContent =
-        "x" +
-        entry.quantity;
-
-      const plus =
-        document.createElement(
-          "button"
-        );
-
-      plus.type =
-        "button";
-
-      plus.textContent =
-        "+";
-
-      plus.addEventListener(
-        "click",
-        () => {
-          entry.quantity += 1;
-
-          saveState();
-
-          renderCategory(
-            category
-          );
-        }
-      );
-
-      controls.append(
-        minus,
-        count,
-        plus
-      );
-
-      info.append(
-        title,
-        meta,
-        controls
-      );
-
-      /* REMOVE */
-
-      const remove =
-        document.createElement(
-          "button"
-        );
-
-      remove.type =
-        "button";
-
-      remove.className =
-        "remove-entry";
-
-      remove.textContent =
-        "×";
-
-      remove.title =
-        "Sterge campionul";
-
-      remove.addEventListener(
-        "click",
-        () => {
-          state[category] =
-            state[
-              category
-            ].filter(
-              item =>
-                item.id !==
-                entry.id
-            );
-
-          saveState();
-
-          renderCategory(
-            category
-          );
-        }
-      );
-
-      card.append(
-        img,
-        info,
-        remove
-      );
-
-      list.appendChild(
-        card
-      );
-    }
-  );
+    list.appendChild(card);
+  });
 }
 
 /* =========================
    INITIALIZATION
 ========================= */
 
-Object.keys(state).forEach(
-  renderCategory
-);
+Object.keys(state).forEach(renderCategory);
 
 if (
-  sessionStorage.getItem(
-    "yoneteLoggedIn"
-  ) === "yes"
+  sessionStorage.getItem("yoneteLoggedIn") === "yes"
 ) {
   showApp();
 }
