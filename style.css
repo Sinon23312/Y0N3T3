@@ -1,5 +1,4 @@
-```css
-* {
+ {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -27,8 +26,16 @@ body {
 body {
   font-family: Arial, Helvetica, sans-serif;
   background:
-    radial-gradient(circle at 20% 10%, rgba(39, 91, 145, 0.18), transparent 30%),
-    radial-gradient(circle at 80% 90%, rgba(132, 54, 98, 0.14), transparent 30%),
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(39, 91, 145, 0.18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 80% 90%,
+      rgba(132, 54, 98, 0.14),
+      transparent 30%
+    ),
     var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -141,7 +148,8 @@ button {
 
 .login-card input:focus {
   border-color: rgba(200, 170, 110, 0.7);
-  box-shadow: 0 0 0 3px rgba(200, 170, 110, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(200, 170, 110, 0.1);
 }
 
 .login-button {
@@ -233,7 +241,8 @@ button {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -244,7 +253,8 @@ button {
   border-radius: 18px;
   padding: 20px;
   backdrop-filter: blur(14px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.22);
 }
 
 /* =========================
@@ -312,7 +322,8 @@ button {
 
 .champion-name:focus {
   border-color: rgba(76, 166, 255, 0.65);
-  box-shadow: 0 0 0 3px rgba(76, 166, 255, 0.08);
+  box-shadow:
+    0 0 0 3px rgba(76, 166, 255, 0.08);
 }
 
 /* =========================
@@ -332,7 +343,8 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   background: #0b1321;
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 18px 35px rgba(0, 0, 0, 0.45);
 }
 
 .suggestions.open {
@@ -489,7 +501,8 @@ button {
 
 .champion-entry {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 30px;
+  grid-template-columns:
+    58px minmax(0, 1fr) 30px;
   align-items: center;
   gap: 12px;
   padding: 9px;
@@ -504,11 +517,10 @@ button {
   border-color: rgba(255, 255, 255, 0.11);
 }
 
-/*
-  Imaginile originale sunt 1536x2752.
-  Folosim object-fit: contain pentru a afisa
-  intreaga imagine fara taiere.
-*/
+/* =========================
+   CHAMPION IMAGE
+========================= */
+
 .champion-entry img {
   width: 58px;
   height: 72px;
@@ -625,6 +637,62 @@ button {
 }
 
 /* =========================
+   IMAGE PREVIEW
+========================= */
+
+.image-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  background: rgba(0, 0, 0, 0.88);
+
+  backdrop-filter: blur(5px);
+
+  cursor: pointer;
+}
+
+.image-preview-full {
+  display: block;
+
+  max-width: 95vw;
+  max-height: 95vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.8);
+
+  animation:
+    imagePreviewAppear
+    0.2s
+    ease-out;
+}
+
+@keyframes imagePreviewAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 
@@ -669,7 +737,8 @@ button {
   }
 
   .champion-entry {
-    grid-template-columns: 52px minmax(0, 1fr) 28px;
+    grid-template-columns:
+      52px minmax(0, 1fr) 28px;
     gap: 9px;
   }
 
@@ -677,5 +746,13 @@ button {
     width: 52px;
     height: 66px;
   }
+
+  .image-preview-overlay {
+    padding: 15px;
+  }
+
+  .image-preview-full {
+    max-width: 96vw;
+    max-height: 96vh;
+  }
 }
-```
