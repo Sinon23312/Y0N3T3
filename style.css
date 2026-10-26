@@ -737,7 +737,7 @@ select:focus {
   max-width: 110px;
   min-height: 110px;
   max-height: 110px;
-  object-fit: fill !important;
+  object-fit: cover !important;
   object-position: center center !important;
   aspect-ratio: 1 / 1;
   background: #050b12;
