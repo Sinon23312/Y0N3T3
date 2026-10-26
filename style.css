@@ -731,8 +731,8 @@ select:focus {
 
 .champion-entry img {
   display: block;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   min-width: 0;
   max-width: 100%;
   object-fit: cover;
@@ -1001,7 +1001,7 @@ footer::before {
   height: auto;
   max-width: min(90vw, 750px);
   max-height: 88vh;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   border: 1px solid var(--gold);
   border-radius: 4px;
@@ -1211,7 +1211,7 @@ footer::before {
   .champion-entry img {
     width: 76px;
     height: 76px;
-    object-fit: contain;
+    object-fit: cover;
   }
 
   .champion-entry .champ-name {
