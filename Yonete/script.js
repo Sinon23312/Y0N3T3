@@ -57,10 +57,12 @@ async function loadChampions() {
     Object.values(json.data).forEach(champion => {
       const name = champion.name.trim();
       const key = normalize(name);
+
       championIndex[key] = {
         name,
         file: champion.image.full.replace(/\.png$/i, ".webp")
       };
+
       championNames.push(name);
     });
 
@@ -68,7 +70,6 @@ async function loadChampions() {
     refreshAllSuggestions();
   } catch (error) {
     console.warn("Lista campionilor Riot nu a putut fi incarcata:", error);
-    // Chiar daca API-ul nu raspunde, utilizatorul poate introduce manual numele.
     refreshAllSuggestions();
   }
 
@@ -77,14 +78,24 @@ async function loadChampions() {
 
 function getMatches(query) {
   const q = normalize(query);
-  if (!q) return championNames.slice(0, 12);
+
+  if (!q) {
+    return championNames.slice(0, 12);
+  }
 
   return championNames
-    .map(name => ({ name, value: normalize(name) }))
+    .map(name => ({
+      name,
+      value: normalize(name)
+    }))
     .sort((a, b) => {
       const aStarts = a.value.startsWith(q) ? 0 : 1;
       const bStarts = b.value.startsWith(q) ? 0 : 1;
-      if (aStarts !== bStarts) return aStarts - bStarts;
+
+      if (aStarts !== bStarts) {
+        return aStarts - bStarts;
+      }
+
       return a.value.localeCompare(b.value);
     })
     .filter(item => item.value.includes(q))
@@ -94,6 +105,7 @@ function getMatches(query) {
 
 function renderSuggestions(input, suggestions, forceShow = false) {
   if (!suggestions) return;
+
   const matches = getMatches(input.value);
   suggestions.innerHTML = "";
 
@@ -109,15 +121,19 @@ function renderSuggestions(input, suggestions, forceShow = false) {
 
   matches.forEach(name => {
     const option = document.createElement("button");
+
     option.type = "button";
     option.className = "suggestion-option";
     option.textContent = name;
+
     option.addEventListener("mousedown", event => {
       event.preventDefault();
+
       input.value = name;
       suggestions.classList.remove("open");
       input.focus();
     });
+
     suggestions.appendChild(option);
   });
 
@@ -128,16 +144,24 @@ function refreshAllSuggestions() {
   document.querySelectorAll(".champion-autocomplete").forEach(wrapper => {
     const input = wrapper.querySelector(".champion-name");
     const suggestions = wrapper.querySelector(".suggestions");
-    if (input && suggestions && document.activeElement === input) {
+
+    if (
+      input &&
+      suggestions &&
+      document.activeElement === input
+    ) {
       renderSuggestions(input, suggestions, true);
     }
   });
 }
 
+// IMAGINILE SUNT IN AFARA FOLDERULUI YONETE
 function imagePath(name) {
-  if (isSecret(name)) return "images/secret.jpg";
+  if (isSecret(name)) {
+    return "../images/secret.jpg";
+  }
 
-  return "images/" + name.trim() + ".jpg";
+  return "../images/" + name.trim() + ".jpg";
 }
 
 function showApp() {
@@ -147,21 +171,29 @@ function showApp() {
 
 loginForm.addEventListener("submit", event => {
   event.preventDefault();
+
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-  if (username === VALID_LOGIN && password === VALID_PASSWORD) {
+
+  if (
+    username === VALID_LOGIN &&
+    password === VALID_PASSWORD
+  ) {
     loginError.textContent = "";
     sessionStorage.setItem("yoneteLoggedIn", "yes");
     showApp();
   } else {
-    loginError.textContent = "Login sau parola incorecta. Incearca din nou.";
+    loginError.textContent =
+      "Login sau parola incorecta. Incearca din nou.";
   }
 });
 
 document.getElementById("logout-button").addEventListener("click", () => {
   sessionStorage.removeItem("yoneteLoggedIn");
+
   appScreen.classList.add("hidden");
   loginScreen.classList.remove("hidden");
+
   document.getElementById("password").value = "";
 });
 
@@ -171,25 +203,47 @@ document.querySelectorAll(".category-panel").forEach(panel => {
   const nameInput = panel.querySelector(".champion-name");
   const suggestions = panel.querySelector(".suggestions");
 
-  nameInput.addEventListener("input", () => renderSuggestions(nameInput, suggestions));
-  nameInput.addEventListener("focus", () => renderSuggestions(nameInput, suggestions, true));
-  nameInput.addEventListener("keydown", event => {
-    if (event.key === "Escape") suggestions.classList.remove("open");
+  nameInput.addEventListener("input", () => {
+    renderSuggestions(
+      nameInput,
+      suggestions
+    );
   });
+
+  nameInput.addEventListener("focus", () => {
+    renderSuggestions(
+      nameInput,
+      suggestions,
+      true
+    );
+  });
+
+  nameInput.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      suggestions.classList.remove("open");
+    }
+  });
+
   document.addEventListener("click", event => {
-    if (!panel.querySelector(".champion-autocomplete")?.contains(event.target)) {
+    if (
+      !panel
+        .querySelector(".champion-autocomplete")
+        ?.contains(event.target)
+    ) {
       suggestions.classList.remove("open");
     }
   });
 
   const damageInput = panel.querySelector(".damage");
   const qtyOutput = panel.querySelector(".qty-value");
+
   let quantity = 1;
 
   panel.querySelector(".qty-minus").addEventListener("click", () => {
     quantity = Math.max(1, quantity - 1);
     qtyOutput.textContent = quantity;
   });
+
   panel.querySelector(".qty-plus").addEventListener("click", () => {
     quantity += 1;
     qtyOutput.textContent = quantity;
@@ -197,11 +251,16 @@ document.querySelectorAll(".category-panel").forEach(panel => {
 
   form.addEventListener("submit", event => {
     event.preventDefault();
+
     const typedName = nameInput.value.trim();
+
     if (!typedName) return;
 
-    // Daca numele corespunde unui campion, salvam forma oficiala.
-    const official = championIndex[normalize(typedName)]?.name;
+    // Daca numele corespunde unui campion,
+    // salvam forma oficiala.
+    const official =
+      championIndex[normalize(typedName)]?.name;
+
     const name = official || typedName;
 
     state[category].push({
@@ -212,103 +271,169 @@ document.querySelectorAll(".category-panel").forEach(panel => {
     });
 
     saveState();
+
     nameInput.value = "";
     suggestions.classList.remove("open");
+
     quantity = 1;
     qtyOutput.textContent = quantity;
+
     renderCategory(category);
   });
 });
 
 function renderCategory(category) {
-  const panel = document.querySelector(`[data-category="${category}"]`);
+  const panel = document.querySelector(
+    `[data-category="${category}"]`
+  );
+
   const list = panel.querySelector(".champion-list");
+
   list.innerHTML = "";
 
   if (state[category].length === 0) {
     const empty = document.createElement("div");
+
     empty.className = "empty-list";
     empty.textContent = "Niciun campion adaugat inca.";
+
     list.appendChild(empty);
+
     return;
   }
 
   state[category].forEach(entry => {
     const card = document.createElement("div");
+
     card.className = "champion-entry";
 
     const img = document.createElement("img");
+
     img.src = imagePath(entry.name);
     img.alt = entry.name;
     img.loading = "lazy";
     img.decoding = "async";
     img.referrerPolicy = "no-referrer";
 
-    // Incearca si varianta versionata a aceluiasi CDN daca latest nu raspunde.
+    // Daca imaginea locala nu exista,
+    // afisam placeholder-ul din folderul images.
     img.onerror = () => {
-      const current = img.getAttribute("src") || "";
-      if (current.includes("ddragon-webp.lolmath.net/latest/")) {
-        img.src = current.replace("/latest/", "/16.18.1/");
-      } else {
-        img.onerror = null;
-        img.src = "images/placeholder.svg";
-      }
+      img.onerror = null;
+      img.src = "../images/placeholder.svg";
     };
 
     const info = document.createElement("div");
+
     const title = document.createElement("div");
+
     title.className = "champ-name";
     title.textContent = entry.name;
 
     const meta = document.createElement("div");
+
     meta.className = "champ-meta";
+
     const damage = document.createElement("span");
-    damage.className = "pill " + entry.damage.toLowerCase();
+
+    damage.className =
+      "pill " + entry.damage.toLowerCase();
+
     damage.textContent = entry.damage;
+
     const categoryPrice = document.createElement("span");
-    categoryPrice.className = "pill price-pill";
-    categoryPrice.textContent = prices[category] + " lei";
-    meta.append(damage, categoryPrice);
+
+    categoryPrice.className =
+      "pill price-pill";
+
+    categoryPrice.textContent =
+      prices[category] + " lei";
+
+    meta.append(
+      damage,
+      categoryPrice
+    );
 
     const controls = document.createElement("div");
+
     controls.className = "entry-controls";
+
     const minus = document.createElement("button");
+
     minus.type = "button";
     minus.textContent = "−";
+
     minus.addEventListener("click", () => {
-      entry.quantity = Math.max(1, entry.quantity - 1);
+      entry.quantity = Math.max(
+        1,
+        entry.quantity - 1
+      );
+
       saveState();
       renderCategory(category);
     });
+
     const count = document.createElement("span");
-    count.textContent = "x" + entry.quantity;
+
+    count.textContent =
+      "x" + entry.quantity;
+
     const plus = document.createElement("button");
+
     plus.type = "button";
     plus.textContent = "+";
+
     plus.addEventListener("click", () => {
       entry.quantity += 1;
+
       saveState();
       renderCategory(category);
     });
-    controls.append(minus, count, plus);
-    info.append(title, meta, controls);
+
+    controls.append(
+      minus,
+      count,
+      plus
+    );
+
+    info.append(
+      title,
+      meta,
+      controls
+    );
 
     const remove = document.createElement("button");
+
     remove.type = "button";
     remove.className = "remove-entry";
     remove.textContent = "×";
     remove.title = "Sterge campionul";
+
     remove.addEventListener("click", () => {
-      state[category] = state[category].filter(item => item.id !== entry.id);
+      state[category] =
+        state[category].filter(
+          item => item.id !== entry.id
+        );
+
       saveState();
       renderCategory(category);
     });
 
-    card.append(img, info, remove);
+    card.append(
+      img,
+      info,
+      remove
+    );
+
     list.appendChild(card);
   });
 }
 
 Object.keys(state).forEach(renderCategory);
-if (sessionStorage.getItem("yoneteLoggedIn") === "yes") showApp();
+
+if (
+  sessionStorage.getItem("yoneteLoggedIn") === "yes"
+) {
+  showApp();
+}
+
 loadChampions();
