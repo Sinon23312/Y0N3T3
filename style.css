@@ -78,7 +78,17 @@ body::after {
   background: var(--gold);
 }
 
+/* Ascunde ecranele inactive */
+
 .hidden {
+  display: none !important;
+}
+
+#login-screen:not(.hidden) {
+  display: grid;
+}
+
+#app-screen.hidden {
   display: none !important;
 }
 
@@ -89,7 +99,7 @@ body::after {
   width: 360px;
   height: 360px;
   border-radius: 50%;
-  filter: blur(80%);
+  filter: blur(80px);
   opacity: 0.15;
   pointer-events: none;
   z-index: -1;
@@ -563,8 +573,6 @@ select:focus {
   outline: 0;
 }
 
-/* Scrollbar pentru lista de sugestii */
-
 .suggestions::-webkit-scrollbar {
   width: 6px;
 }
@@ -690,7 +698,8 @@ select:focus {
 
 .champion-entry {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr) 26px;
+  /* Coloana imaginii are aceeasi dimensiune ca imaginea */
+  grid-template-columns: 120px minmax(0, 1fr) 26px;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -727,17 +736,17 @@ select:focus {
   opacity: 1;
 }
 
-/* Imaginea din lista: patrat fix, umplut complet */
+/* Imaginea campionului: 120x120, fara decupare si fara deformare */
 
 .champion-entry img {
   display: block;
-  width: 80% !important;
-  height: 80% !important;
- min-width: 80%;
-  max-width: 80%;
-  min-height: 80%;
-  max-height: 80%;
-  object-fit: cover !important;
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  object-fit: contain !important;
   object-position: center center !important;
   aspect-ratio: 1 / 1;
   background: #050b12;
@@ -745,6 +754,8 @@ select:focus {
   border-radius: 3px;
   padding: 0;
   cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
   transition: border-color 0.25s, filter 0.25s, transform 0.25s;
 }
 
@@ -1003,7 +1014,7 @@ footer::before {
   height: auto;
   max-width: min(90vw, 750px);
   max-height: 88vh;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   border: 1px solid var(--gold);
   border-radius: 4px;
@@ -1025,6 +1036,180 @@ footer::before {
 }
 
 /* =====================================================
+   RULETA CAMPIONILOR - HEXTECH THEME
+   ===================================================== */
+
+.roulette-widget {
+  width: 100%;
+  min-width: 0;
+  margin: 14px 0;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(200, 170, 110, 0.55);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(10, 200, 185, 0.13), transparent 75%),
+    linear-gradient(145deg, rgba(13, 31, 42, 0.98), rgba(3, 8, 14, 0.98));
+  box-shadow:
+    inset 0 0 20px rgba(10, 200, 185, 0.035),
+    0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+.roulette-widget::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--blue), transparent);
+}
+
+.roulette-heading {
+  color: var(--gold);
+  font: 700 10px Cinzel, serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 0 10px;
+}
+
+.roulette-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 112px;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(200, 170, 110, 0.22);
+  background:
+    radial-gradient(ellipse at center, rgba(10, 200, 185, 0.08), transparent 70%),
+    #050b12;
+}
+
+.roulette-stage::before,
+.roulette-stage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 22px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.roulette-stage::before {
+  left: 0;
+  background: linear-gradient(90deg, #050b12, transparent);
+}
+
+.roulette-stage::after {
+  right: 0;
+  background: linear-gradient(270deg, #050b12, transparent);
+}
+
+/* Imaginea ruletei are reguli proprii */
+
+.champion-entry .roulette-stage img {
+  display: block;
+  width: 104px !important;
+  height: 104px !important;
+  min-width: 104px !important;
+  min-height: 104px !important;
+  max-width: 104px !important;
+  max-height: 104px !important;
+  flex: 0 0 104px;
+  object-fit: contain !important;
+  object-position: center !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 3px;
+  padding: 0 !important;
+  background: #050b12;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(10, 200, 185, 0.12);
+}
+
+.roulette-result {
+  margin-top: 10px;
+  min-height: 20px;
+  color: var(--gold-light);
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.roulette-result strong {
+  color: var(--blue-light);
+}
+
+.roulette-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.roulette-buttons button {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 8px;
+  color: #f2e7cb;
+  font: 800 10px Inter, sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(110deg, #392f1d, #70552b, #392f1d);
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.roulette-buttons button:hover:not(:disabled) {
+  filter: brightness(1.25);
+  transform: translateY(-1px);
+  border-color: var(--gold-bright);
+}
+
+.roulette-buttons button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.roulette-buttons .roulette-add-button {
+  color: #d8f7f2;
+  border-color: #24675f;
+  background: linear-gradient(110deg, #102b35, #16434a);
+}
+
+.roulette-buttons .roulette-add-button:hover:not(:disabled) {
+  border-color: var(--blue);
+}
+
+.roulette-widget.is-spinning .roulette-stage {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 24px rgba(10, 200, 185, 0.12);
+}
+
+.roulette-widget.is-spinning .roulette-stage img {
+  filter: saturate(1.25) brightness(1.12);
+}
+
+.roulette-widget.is-winner .roulette-stage {
+  border-color: var(--gold-bright);
+  box-shadow:
+    inset 0 0 25px rgba(200, 170, 110, 0.12),
+    0 0 20px rgba(200, 170, 110, 0.1);
+}
+
+.roulette-widget.is-winner .roulette-result {
+  color: var(--gold-bright);
+  text-shadow: 0 0 12px rgba(200, 170, 110, 0.15);
+}
+
+/* =====================================================
    ANIMATII
    ===================================================== */
 
@@ -1032,7 +1217,6 @@ footer::before {
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -1043,7 +1227,6 @@ footer::before {
     opacity: 0;
     transform: scale(0.94);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
@@ -1055,7 +1238,6 @@ footer::before {
     opacity: 0;
     transform: translateY(12px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1066,7 +1248,6 @@ footer::before {
   0%, 100% {
     box-shadow: 0 0 7px #42e5b4;
   }
-
   50% {
     box-shadow: 0 0 15px #42e5b4;
   }
@@ -1195,6 +1376,10 @@ footer::before {
     grid-template-columns: 1fr;
   }
 
+  .category-panel {
+    padding: 22px 18px;
+  }
+
   .category-heading h2 {
     font-size: 18px;
   }
@@ -1204,20 +1389,20 @@ footer::before {
   }
 
   .champion-entry {
-    grid-template-columns: 76px minmax(0, 1fr) 24px;
+    grid-template-columns: 120px minmax(0, 1fr) 24px;
     gap: 10px;
     padding: 10px;
-    min-height: 96px;
+    min-height: 144px;
   }
 
-  .champion-entry img {
-    width: 76px !important;
-    height: 76px !important;
-    min-width: 76px;
-    max-width: 76px;
-    min-height: 76px;
-    max-height: 76px;
-    object-fit: cover !important;
+  .champion-entry > img {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+    object-fit: contain !important;
     object-position: center center !important;
     padding: 0;
   }
@@ -1239,6 +1424,30 @@ footer::before {
   .champion-entry .remove-entry {
     width: 24px;
     height: 24px;
+  }
+
+  .roulette-widget {
+    padding: 9px;
+  }
+
+  .champion-entry .roulette-stage img {
+    width: 92px !important;
+    height: 92px !important;
+    min-width: 92px !important;
+    min-height: 92px !important;
+    max-width: 92px !important;
+    max-height: 92px !important;
+    flex-basis: 92px;
+    object-fit: contain !important;
+  }
+
+  .roulette-stage {
+    min-height: 100px;
+  }
+
+  .roulette-buttons button {
+    font-size: 9px;
+    letter-spacing: 0.5px;
   }
 
   .summary-panel {
@@ -1298,5 +1507,224 @@ footer::before {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* =====================================================
+   RULETA - BUTON MIC PENTRU REDESCHIDERE
+   ===================================================== */
+
+.roulette-reopen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 15px;
+  margin: 12px 0;
+  border: 1px solid var(--blue);
+  border-radius: 3px;
+  background: linear-gradient(135deg, #102b35, #07141e);
+  color: var(--blue-light);
+  font: 800 10px Inter, sans-serif;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(10, 200, 185, 0.08);
+  transition:
+    background 0.25s,
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.25s;
+}
+
+.roulette-reopen:hover {
+  background: linear-gradient(135deg, #16434a, #102b35);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 0 18px rgba(10, 200, 185, 0.16);
+  transform: translateY(-1px);
+}
+
+.roulette-reopen:active {
+  transform: translateY(0);
+}
+
+.roulette-reopen:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* =====================================================
+   RULETA - CONFIRMARE ESTI SIGUR?
+   ===================================================== */
+
+.roulette-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px 10px;
+  border: 1px solid rgba(200, 170, 110, 0.35);
+  background:
+    radial-gradient(
+      ellipse at top,
+      rgba(10, 200, 185, 0.08),
+      transparent 75%
+    ),
+    rgba(3, 8, 14, 0.85);
+  animation: cardAppear 0.25s ease both;
+}
+
+.roulette-confirm-question {
+  width: 100%;
+  margin: 0 0 3px;
+  color: var(--gold-light);
+  font: 700 12px Cinzel, serif;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.roulette-confirm button {
+  min-width: 85px;
+  padding: 9px 17px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font: 800 10px Inter, sans-serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    filter 0.2s,
+    transform 0.2s,
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.roulette-confirm button:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.roulette-confirm button:active {
+  transform: translateY(0);
+}
+
+.roulette-confirm button:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+.roulette-confirm-yes {
+  background: linear-gradient(110deg, #102b35, #16434a);
+  border-color: var(--blue) !important;
+  color: var(--blue-light);
+}
+
+.roulette-confirm-yes:hover {
+  background: linear-gradient(110deg, #16434a, #1a5558);
+}
+
+.roulette-confirm-no {
+  background: linear-gradient(110deg, #182330, #0b131d);
+  border-color: #455664 !important;
+  color: #d3d9df;
+}
+
+.roulette-confirm-no:hover {
+  border-color: var(--gold) !important;
+  color: var(--gold-light);
+}
+
+/* =====================================================
+   RULETA - SANSA CAMPIONULUI
+   ===================================================== */
+
+.roulette-chance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 8px auto 0;
+  padding: 6px 10px;
+  max-width: 100%;
+  border: 1px solid rgba(10, 200, 185, 0.35);
+  background: rgba(10, 200, 185, 0.06);
+  color: var(--blue-light);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.roulette-chance-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.roulette-chance-value {
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(200, 170, 110, 0.12);
+}
+
+.roulette-widget.is-spinning .roulette-chance {
+  display: none;
+}
+
+/* =====================================================
+   RULETA - STARI SI ACCESIBILITATE
+   ===================================================== */
+
+.roulette-widget.is-saved {
+  border-color: rgba(10, 200, 185, 0.5);
+}
+
+.roulette-widget.is-saved .roulette-stage {
+  border-color: rgba(10, 200, 185, 0.5);
+}
+
+.roulette-widget button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+  transform: none;
+}
+
+.roulette-widget button:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* =====================================================
+   RESPONSIVE - RULETA PE TELEFOANE
+   ===================================================== */
+
+@media (max-width: 650px) {
+  .roulette-reopen {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .roulette-confirm {
+    gap: 8px;
+    padding: 12px 8px;
+  }
+
+  .roulette-confirm-question {
+    font-size: 11px;
+  }
+
+  .roulette-confirm button {
+    flex: 1;
+    min-width: 70px;
+    padding: 10px;
+  }
+
+  .roulette-chance {
+    font-size: 10px;
+    padding: 6px 8px;
   }
 }
