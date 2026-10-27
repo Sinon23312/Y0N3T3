@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08131d">
   <title>Y0N3T3 | League of Legends</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,6 +12,7 @@
   <div class="ambient ambient-one"></div>
   <div class="ambient ambient-two"></div>
 
+  <!-- Ecran de autentificare -->
   <main id="login-screen" class="login-screen">
     <section class="login-card">
       <div class="crest">Y</div>
@@ -50,6 +52,7 @@
     </section>
   </main>
 
+  <!-- Aplicatia principala -->
   <main id="app-screen" class="app-screen hidden">
     <header class="topbar">
       <div class="brand">
@@ -63,7 +66,7 @@
       <div class="header-right">
         <span class="online-dot"></span>
         <span>Summoner online</span>
-        <button id="logout-button" class="ghost-button">
+        <button id="logout-button" class="ghost-button" type="button">
           Deconectare
         </button>
       </div>
@@ -96,6 +99,7 @@
           <div class="champion-autocomplete">
             <input
               class="champion-name"
+              type="text"
               placeholder="Campion"
               autocomplete="off"
               required
@@ -131,6 +135,7 @@
           </button>
         </form>
 
+        <!-- Aici JavaScript-ul afiseaza campionii si ruleta, daca este cazul. -->
         <div class="champion-list"></div>
       </article>
 
@@ -154,6 +159,7 @@
           <div class="champion-autocomplete">
             <input
               class="champion-name"
+              type="text"
               placeholder="Campion"
               autocomplete="off"
               required
@@ -189,6 +195,7 @@
           </button>
         </form>
 
+        <!-- Aici JavaScript-ul afiseaza campionii si ruleta, daca este cazul. -->
         <div class="champion-list"></div>
       </article>
 
@@ -212,6 +219,7 @@
           <div class="champion-autocomplete">
             <input
               class="champion-name"
+              type="text"
               placeholder="Campion"
               autocomplete="off"
               required
@@ -247,6 +255,7 @@
           </button>
         </form>
 
+        <!-- Aici JavaScript-ul afiseaza campionii si ruleta, daca este cazul. -->
         <div class="champion-list"></div>
       </article>
 
@@ -257,7 +266,7 @@
     </footer>
   </main>
 
+  <!-- Pastreaza scriptul la final, dupa elementele HTML. -->
   <script src="script.js"></script>
 </body>
 </html>
-
